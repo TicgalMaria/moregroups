@@ -1,86 +1,31 @@
-# 0GLPIXO
-GLPI Plugin
+# More Groups
 
-![Version](https://img.shields.io/github/v/release/TICGAL-Dev/0GLPIxx)
-![License](https://img.shields.io/github/license/TICGAL-Dev/0GLPIxx)
-![Issues](https://img.shields.io/github/issues/TICGAL-Dev/0GLPIxx)
-![Pull Requests](https://img.shields.io/github/issues-pr/TICGAL-Dev/0GLPIxx)
-![Last Commit](https://img.shields.io/github/last-commit/TICGAL-Dev/0GLPIxx)
-![Project Status](https://img.shields.io/badge/status-active-brightgreen)
+<img src="https://github.com/ticgal/moregroups/blob/multimedia/moregroups.png" alt="More Groups Logo" height="250px" width="250px" class="js-lazy-loaded">
 
-## Features
-- It has 👍
+[![License](https://img.shields.io/badge/License-GNU%20AGPLv3-blue.svg?style=flat-square)](https://github.com/TICGAL-Dev/moregroups/blob/develop/LICENSE)
+[![X](https://img.shields.io/twitter/follow/ticgalcom?style=flat-square&logo=x&label=Follow)](https://twitter.com/ticgalcom)
+[![Web](https://img.shields.io/badge/Web-TICGAL-blue.svg?style=flat-square)](https://tic.gal/)
+[![Localazy](https://img.shields.io/badge/Translate-Localazy-cyan)](https://localazy.com/p/more-groups)
+[![Manual](https://img.shields.io/badge/Manual-docs.tic.gal-blue.svg?style=flat-square)](https://docs.tic.gal/books/more-groups)
+[![Marketplace](https://img.shields.io/badge/GLPI-Marketplace-orange.svg?style=flat-square)](https://plugins.glpi-project.org/#/plugins/moregroups)
 
-## Table of contents
-- Instalation
-- Configuration
-- Use
+Fast group-membership management for GLPI: deactivate a group member without
+losing their membership details, and reactivate them later in one click.
 
----
+### Setup
+Install it from the [GLPI Marketplace](https://plugins.glpi-project.org/#/plugins/moregroups)
+(Setup > Plugins), or download and install it in the plugin folder.
 
-<!-- bootstrap-note:start -->
-> **Just created a repository from this template?** Start with
-> [`GETTING_STARTED.md`](GETTING_STARTED.md): the step-by-step roadmap, including
-> the right order (create the branch **before** renaming).
-> For the day-to-day, see [`CONTRIBUTING.md`](CONTRIBUTING.md).
+### How to use
+On a **Group**'s Users tab, use the deactivate button (or the matching
+massive action) to move a member out of the group without deleting their
+membership. They appear in the **Deactivated users** panel, where a single
+click on the activate button restores them to the group with their original
+dynamic, manager and delegatee flags.
 
----
-<!-- bootstrap-note:end -->
+Re-adding a previously deactivated user through GLPI's own "Add user to
+group" form clears their stale deactivated record automatically.
 
-
-## Starting from this template
-
-```bash
-tools/rename_plugin.sh                  # key taken from the directory
-tools/rename_plugin.sh "Leave Manager"  # + display name
-```
-
-**The plugin key is the directory name**, which is already the name of the
-repository you cloned, so there is nothing to type and nothing that can disagree
-with it. The single argument is optional and only sets the name shown in the
-plugin list, where spaces are allowed; it defaults to the capitalised key.
-
-If the directory is not usable as a key (uppercase, hyphens, dots) the script
-stops and tells you what to rename. Renaming it is not cosmetic: GLPI derives
-from it
-
-- the PSR-4 namespace, `GlpiPlugin\Myplugin\` mapped to `src/`,
-- the Twig namespace, `@myplugin/...` mapped to `templates/`,
-- the route prefix, `/plugins/myplugin/...`.
-
-A directory whose name does not match the placeholder replacement will silently
-fail to autoload the plugin's classes.
-
-## Layout
-
-| Path | Contents |
-|---|---|
-| `setup.php` | version, requirements and `$PLUGIN_HOOKS` registration |
-| `hook.php` | install/uninstall entry points; keep business logic in `src/` |
-| `src/` | all classes, namespace `GlpiPlugin\Myplugin\` |
-| `templates/` | Twig views, addressed as `@myplugin/pages/x.html.twig` |
-| `front/` | page entry points |
-| `ajax/` | asynchronous endpoints |
-| `locales/` | translations, extracted with `tools/extract_template.sh` |
-
-GLPI 11 registers the PSR-4 namespace for `src/` on its own, so the plugin's
-`vendor/autoload.php` is never loaded by the core. The entry in `composer.json`
-exists for the tooling (PHPStan, IDE, PHP-CS-Fixer), not for runtime.
-
-### `front/` is optional for an itemtype
-
-GLPI 11 resolves `/plugins/myplugin/front/<itemtype>[.form].php` to its generic
-controllers (`GenericListController`, `GenericFormController`,
-`DropdownFormController`) even when the file does not exist, as long as the class
-resolves as `GlpiPlugin\Myplugin\<Itemtype>`. The `front/dropdown.php` and
-`front/dropdown.form.php` shipped here are kept as an explicit example; a plain
-CRUD itemtype does not need them.
-
-## Development
-
-```bash
-composer install
-bash tools/phpstan.sh        # static analysis
-bash tools/php-cs-fixer.sh   # apply code style
-bash tools/codesniffer.sh    # apply PHPCS fixes
-```
+### Additional features
+- Deactivate/activate as a massive action across several members at once
+- Deactivated users tracked per group in a dedicated panel

@@ -4,11 +4,11 @@
 		"deprecate": "project",
 		"files": [
 			{
-				"pattern": "0GLPIxx.pot",
+				"pattern": "moregroups.pot",
 				"lang": "en_GB"
 			}, {
 				"group": "existing",
-				"file": "0GLPIxx.pot",
+				"file": "moregroups.pot",
 				"pattern": "./*.po",
 				"type": "po",
 				"lang": "${autodetectLang}"
@@ -16,6 +16,7 @@
 		]
 	},
 	"download": {
+		"includeSourceLang": true,
 		"files": "${languageCode}_${regionCode}.po"
 	}
 }

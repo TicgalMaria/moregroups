@@ -1,0 +1,42 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: More Groups\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-18 13:31+0200\n"
+"Language: gl_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: hook.php:73
+msgid "Deactivate users"
+msgstr "Desactivar usuarios"
+
+#: inc/group.class.php:43 inc/group.class.php:163
+msgid "Deactivated users"
+msgstr "Usuarios desactivados"
+
+#: inc/group.class.php:57
+msgid "Activate users"
+msgstr "Activar usuarios"
+
+#: inc/group.class.php:67
+msgctxt "button"
+msgid "Deactivate users"
+msgstr "Desactivar usuarios"
+
+#: inc/group.class.php:71
+msgctxt "button"
+msgid "Activate users"
+msgstr "Activar usuarios"
+
+#: inc/group.class.php:224
+msgctxt "button"
+msgid "Activate user"
+msgstr "Activar usuario"
+
+#: inc/group.class.php:241
+msgctxt "button"
+msgid "Deactivate user"
+msgstr "Desactivar usuario"
