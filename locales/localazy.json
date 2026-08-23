@@ -1,0 +1,22 @@
+{
+	"upload": {
+		"type": "pot",
+		"deprecate": "project",
+		"files": [
+			{
+				"pattern": "moregroups.pot",
+				"lang": "en_GB"
+			}, {
+				"group": "existing",
+				"file": "moregroups.pot",
+				"pattern": "./*.po",
+				"type": "po",
+				"lang": "${autodetectLang}"
+			}
+		]
+	},
+	"download": {
+		"includeSourceLang": true,
+		"files": "${languageCode}_${regionCode}.po"
+	}
+}

@@ -1,0 +1,41 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Localazy (https://localazy.com)\n"
+"Project-Id-Version: More Groups\n"
+"Language: en_GB\n"
+"Plural-Forms: nplurals=2; plural=(n==1) ? 0 : 1;\n"
+
+#: inc/group.class.php:224
+msgctxt "button"
+msgid "Activate user"
+msgstr "Activate user"
+
+#: inc/group.class.php:57
+msgid "Activate users"
+msgstr "Activate users"
+
+#: inc/group.class.php:71
+msgctxt "button"
+msgid "Activate users"
+msgstr "Activate users"
+
+#: inc/group.class.php:241
+msgctxt "button"
+msgid "Deactivate user"
+msgstr "Deactivate user"
+
+#: hook.php:73
+msgid "Deactivate users"
+msgstr "Deactivate users"
+
+#: inc/group.class.php:67
+msgctxt "button"
+msgid "Deactivate users"
+msgstr "Deactivate users"
+
+#: inc/group.class.php:43 inc/group.class.php:163
+msgid "Deactivated users"
+msgstr "Deactivated users"

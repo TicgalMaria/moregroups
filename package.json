@@ -1,0 +1,16 @@
+{
+  "name": "moregroups",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "manual": "npm run manual:fixture:restore && npm run manual:capture && npm run manual:render",
+    "manual:capture": "tools/manual-generator/run.sh",
+    "manual:render": "node tools/manual-generator/render-manual.mjs",
+    "manual:fixture:dump": "tools/manual-generator/fixtures/dump.sh",
+    "manual:fixture:restore": "tools/manual-generator/fixtures/restore.sh",
+    "manual:all": "for l in en_GB; do MANUAL_LOCALE=$l npm run manual; done"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
+  }
+}
