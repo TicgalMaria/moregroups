@@ -47,6 +47,12 @@ class GroupActionController extends AbstractController
 	#[Route('/GroupAction', name: 'moregroups_group_action', methods: ['POST'])]
 	public function __invoke(Request $request): Response
 	{
+		global $CFG_GLPI;
+
+		if (!Session::validateCSRF($request->request->all())) {
+			throw new AccessDeniedHttpException();
+		}
+
 		$rowaction = $request->request->get('rowaction');
 		$rowid     = $request->request->get('rowid');
 
@@ -64,13 +70,32 @@ class GroupActionController extends AbstractController
 			$this->deactivate((int) $rowid);
 		}
 
-		return new RedirectResponse($request->headers->get('referer') ?? '/');
+		// Html::getBackUrl() sanitizes the Referer header (rejects `javascript:`, etc.)
+		// but does not restrict it to this GLPI instance — an absolute external URL
+		// passes its check unchanged, and \Glpi\Toolbox\URL::isGLPIRelativeUrl() rejects
+		// *every* browser-sent Referer because browsers always send an absolute URL, not
+		// a relative one. Compare the host explicitly instead: allow same-origin targets,
+		// fall back to a known-safe internal page for anything else.
+		//
+		// A target is only trusted as "already relative" when it starts with a single
+		// `/` followed by neither `/` nor `\` — WHATWG URL parsing treats a leading
+		// `/\` or `//` the same as `//host/...` for http(s), so `parse_url()` reporting
+		// a null host is not enough on its own to call it same-origin.
+		$back_url  = \Html::getBackUrl();
+		$back_host = parse_url($back_url, PHP_URL_HOST);
+		$base_host = parse_url($CFG_GLPI['url_base'], PHP_URL_HOST);
+		$is_relative = $back_host === null && preg_match('#^/[^/\\\\]#', $back_url) === 1;
+		if (!$is_relative && $back_host !== $base_host) {
+			$back_url = $CFG_GLPI['root_doc'] . '/front/central.php';
+		}
+
+		return new RedirectResponse($back_url);
 	}
 
 	private function canAccessGroup(array $fields): bool
 	{
 		$group = new Group();
-		return $group->can($fields['groups_id'] ?? 0, READ);
+		return $group->can($fields['groups_id'] ?? 0, UPDATE);
 	}
 
 	private function activate(int $rowid): void

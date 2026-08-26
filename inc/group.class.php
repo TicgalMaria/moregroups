@@ -56,7 +56,9 @@ class PluginMoregroupsGroup extends CommonDBChild
 	public function getSpecificMassiveActions($checkitem = null)
 	{
 		$actions = [];
-		$actions[__CLASS__ . MassiveAction::CLASS_ACTION_SEPARATOR . 'activate'] = __('Activate users', 'moregroups');
+		if (Group_User::canUpdate()) {
+			$actions[__CLASS__ . MassiveAction::CLASS_ACTION_SEPARATOR . 'activate'] = __('Activate users', 'moregroups');
+		}
 
 		$actions += parent::getSpecificMassiveActions($checkitem);
 		return $actions;
@@ -77,24 +79,16 @@ class PluginMoregroupsGroup extends CommonDBChild
 		return parent::showMassiveActionsSubForm($ma);
 	}
 
-	private static function canAccessGroupEntity($groups_id)
-	{
-		$group = new Group();
-		return $group->can($groups_id, READ);
-	}
-
 	static function processMassiveActionsForOneItemtype(MassiveAction $ma, CommonDBTM $item, array $ids)
 	{
-		global $DB;
-
 		switch ($ma->getAction()) {
 			case 'deactivate':
 				foreach ($ids as $id) {
 					if (!$item->getFromDB($id)) {
 						$ma->itemDone($item->getType(), $id, MassiveAction::ACTION_KO);
 						$ma->addMessage($item->getErrorMessage(ERROR_NOT_FOUND));
-					} elseif (!self::canAccessGroupEntity($item->fields['groups_id'])) {
-						$ma->itemDone($item->getType(), $id, MassiveAction::ACTION_KO);
+					} elseif (!$item->can($id, UPDATE)) {
+						$ma->itemDone($item->getType(), $id, MassiveAction::ACTION_NORIGHT);
 						$ma->addMessage($item->getErrorMessage(ERROR_RIGHT));
 					} else {
 						$input = $item->fields;
@@ -120,8 +114,8 @@ class PluginMoregroupsGroup extends CommonDBChild
 					if (!$item->getFromDB($id)) {
 						$ma->itemDone($item->getType(), $id, MassiveAction::ACTION_KO);
 						$ma->addMessage($item->getErrorMessage(ERROR_NOT_FOUND));
-					} elseif (!self::canAccessGroupEntity($item->fields['groups_id'])) {
-						$ma->itemDone($item->getType(), $id, MassiveAction::ACTION_KO);
+					} elseif (!$item->can($id, UPDATE) || !Group_User::canUpdate()) {
+						$ma->itemDone($item->getType(), $id, MassiveAction::ACTION_NORIGHT);
 						$ma->addMessage($item->getErrorMessage(ERROR_RIGHT));
 					} else {
 						$input = $item->fields;
@@ -280,7 +274,9 @@ class PluginMoregroupsGroup extends CommonDBChild
 				KEY `is_manager` (`is_manager`),
 				KEY `is_userdelegate` (`is_userdelegate`)
 			) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
-			$DB->doQuery($query) or die($DB->error());
+			if (!$DB->doQuery($query)) {
+				$migration->displayWarning("Error creating table $table: " . $DB->error(), true);
+			}
 		}
 	}
 
