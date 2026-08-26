@@ -22,6 +22,8 @@ reference, or note on what went wrong.
 | 13 | Rights are enforced | Log in as a profile without the Group_User update right, try to deactivate/activate | Action is refused (access denied), nothing changes | | |
 | 14 | Entity isolation | Log in as a user restricted to one entity, try to act on a group in a different entity (e.g. via direct URL/id) | Action is refused, nothing changes | | |
 | 15 | Plugin uninstalls cleanly | Deactivate then uninstall the plugin | No error; the plugin's database table is removed | | |
+| 16 | Deactivate/activate redirects back to GLPI, never off-site | Deactivate or activate a member normally | Browser lands back on a page within this GLPI instance | | |
+| 17 | Deactivate/activate is rejected without a valid form submission | Attempt to trigger deactivate/activate via a hand-crafted request that skips the page's own form (e.g. replaying the request without its hidden security token) | Action is refused, nothing changes | | |
 
 ## Known limitations
 - The "Deactivated users" panel is only shown on the **Group** item's Users

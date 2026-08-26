@@ -67,7 +67,7 @@ function plugin_moregroups_uninstall()
 function plugin_moregroups_MassiveActions($type) {
 	$actions = [];
 
-	if ($type == 'Group_User') {
+	if ($type == 'Group_User' && Group_User::canUpdate()) {
 		$myclass = 'PluginMoregroupsGroup';
 		$action_key = 'deactivate';
 		$action_label = __('Deactivate users', 'moregroups');
