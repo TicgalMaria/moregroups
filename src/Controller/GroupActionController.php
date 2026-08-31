@@ -64,7 +64,7 @@ class GroupActionController extends AbstractController
 			$this->deactivate((int) $rowid);
 		}
 
-		return new RedirectResponse($request->headers->get('referer') ?? '/');
+		return new RedirectResponse(\Html::getBackUrl());
 	}
 
 	private function canAccessGroup(array $fields): bool
