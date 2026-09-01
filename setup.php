@@ -30,7 +30,7 @@
 
 use Glpi\Plugin\Hooks;
 
-define('PLUGIN_MOREGROUPS_VERSION', '2.0.2');
+define('PLUGIN_MOREGROUPS_VERSION', '2.0.3');
 define('PLUGIN_MOREGROUPS_MIN_GLPI', '11.0.0');
 define('PLUGIN_MOREGROUPS_MAX_GLPI', '11.0.99');
 
