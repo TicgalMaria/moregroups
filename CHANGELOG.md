@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## 2.0.2 - 01/09/2026
+### Bugs
+- Fix safety warnings
+
 ## 2.0.1 - 18/08/2026
 ### Features
 - Published an online user manual
