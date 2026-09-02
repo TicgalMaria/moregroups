@@ -47,6 +47,12 @@ class GroupActionController extends AbstractController
 	#[Route('/GroupAction', name: 'moregroups_group_action', methods: ['POST'])]
 	public function __invoke(Request $request): Response
 	{
+		global $CFG_GLPI;
+
+		if (!Session::validateCSRF($request->request->all())) {
+			throw new AccessDeniedHttpException();
+		}
+
 		$rowaction = $request->request->get('rowaction');
 		$rowid     = $request->request->get('rowid');
 
@@ -70,7 +76,7 @@ class GroupActionController extends AbstractController
 	private function canAccessGroup(array $fields): bool
 	{
 		$group = new Group();
-		return $group->can($fields['groups_id'] ?? 0, READ);
+		return $group->can($fields['groups_id'] ?? 0, UPDATE);
 	}
 
 	private function activate(int $rowid): void

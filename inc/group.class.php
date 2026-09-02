@@ -56,7 +56,6 @@ class PluginMoregroupsGroup extends CommonDBChild
 	public function getSpecificMassiveActions($checkitem = null)
 	{
 		$actions = [];
-		// Solo ofrecer la acción si el usuario tiene permiso de modificación
 		if (Group_User::canUpdate()) {
 			$actions[__CLASS__ . MassiveAction::CLASS_ACTION_SEPARATOR . 'activate'] = __('Activate users', 'moregroups');
 		}
@@ -88,7 +87,6 @@ class PluginMoregroupsGroup extends CommonDBChild
 					if (!$item->getFromDB($id)) {
 						$ma->itemDone($item->getType(), $id, MassiveAction::ACTION_KO);
 						$ma->addMessage($item->getErrorMessage(ERROR_NOT_FOUND));
-						// CORRECCIÓN VULNERABILIDAD ALTA: Validar permiso de UPDATE en la relación Group_User
 					} elseif (!$item->can($id, UPDATE)) {
 						$ma->itemDone($item->getType(), $id, MassiveAction::ACTION_NORIGHT);
 						$ma->addMessage($item->getErrorMessage(ERROR_RIGHT));
@@ -117,7 +115,6 @@ class PluginMoregroupsGroup extends CommonDBChild
 					if (!$item->getFromDB($id)) {
 						$ma->itemDone($item->getType(), $id, MassiveAction::ACTION_KO);
 						$ma->addMessage($item->getErrorMessage(ERROR_NOT_FOUND));
-						// CORRECCIÓN VULNERABILIDAD ALTA: Exigir permiso de UPDATE en el registro y en Group_User
 					} elseif (!$item->can($id, UPDATE) || !Group_User::canUpdate()) {
 						$ma->itemDone($item->getType(), $id, MassiveAction::ACTION_NORIGHT);
 						$ma->addMessage($item->getErrorMessage(ERROR_RIGHT));
@@ -278,7 +275,6 @@ class PluginMoregroupsGroup extends CommonDBChild
                 KEY `is_userdelegate` (`is_userdelegate`)
             ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;";
 
-			// CORRECCIÓN SEVERIDAD BAJA: Manejo seguro de errores sin romper la ejecución PHP con die()
 			if (!$DB->doQuery($query)) {
 				\Session::addMessageAfterRedirect(
 					sprintf(__('Error creating table %s: %s', 'moregroups'), 'glpi_plugin_moregroups_groups', $DB->error()),

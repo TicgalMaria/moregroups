@@ -73,6 +73,11 @@ class PluginMoregroupsGroupTest extends DbTestCase
 
 	public function testActivateMassiveActionIsAdvertised(): void
 	{
+		// Since the HIGH-severity fix, the action is only advertised to a
+		// session holding Group_User::canUpdate() — an anonymous session
+		// (no login()) correctly no longer sees it.
+		$this->login();
+
 		$item = new PluginMoregroupsGroup();
 		$actions = $item->getSpecificMassiveActions();
 
@@ -220,6 +225,82 @@ class PluginMoregroupsGroupTest extends DbTestCase
 			'groups_id' => $other_group->getID(),
 			'users_id'  => $user_id,
 		]));
+	}
+
+	public function testMassiveActionDeniedWithReadOnlyRight(): void
+	{
+		$this->login();
+
+		[$group, $group_user, $user_id] = $this->createGroupWithMember();
+		$group_user_id = $group_user->getID();
+
+		$tracked = $this->createItem('PluginMoregroupsGroup', [
+			'groups_id' => $group->getID(),
+			'users_id'  => $user_id,
+		]);
+
+		// Downgrade the active profile's "group" right to READ-only, the
+		// regression case for the HIGH finding from the external Teclib'
+		// security review: a user with only group READ must not be able to
+		// add/remove Group_User rows through these massive actions.
+		// Group_User::canUpdate() (CommonDBRelation::canRelation()) passes if
+		// EITHER linked itemtype's own canUpdate() passes — User's or
+		// Group's — so "user" must be stripped too, or the default test
+		// session's own admin-level "user" right silently keeps it allowed.
+		$_SESSION['glpiactiveprofile']['group'] = READ;
+		$_SESSION['glpiactiveprofile']['user'] = READ;
+
+		$ma = new MassiveAction([
+			'action'      => 'deactivate',
+			'action_name' => 'Deactivate users',
+			'items'       => [Group_User::class => [$group_user_id => 'on']],
+		], [], 'process');
+		PluginMoregroupsGroup::processMassiveActionsForOneItemtype($ma, new Group_User(), [$group_user_id]);
+
+		$this->assertSame(0, $ma->results['ok']);
+		$this->assertGreaterThan(0, $ma->results['noright'] ?? 0);
+		$this->assertTrue(
+			(new Group_User())->getFromDB($group_user_id),
+			'The Group_User row must survive a denied deactivate attempt'
+		);
+
+		$ma2 = new MassiveAction([
+			'action'      => 'activate',
+			'action_name' => 'Activate users',
+			'items'       => [PluginMoregroupsGroup::class => [$tracked->getID() => 'on']],
+		], [], 'process');
+		PluginMoregroupsGroup::processMassiveActionsForOneItemtype($ma2, new PluginMoregroupsGroup(), [$tracked->getID()]);
+
+		$this->assertSame(0, $ma2->results['ok']);
+		$this->assertGreaterThan(0, $ma2->results['noright'] ?? 0);
+		$this->assertTrue(
+			(new PluginMoregroupsGroup())->getFromDB($tracked->getID()),
+			'The tracking row must survive a denied activate attempt'
+		);
+	}
+
+	public function testMassiveActionsHiddenWithoutRight(): void
+	{
+		$this->login();
+		$_SESSION['glpiactiveprofile']['group'] = READ;
+		$_SESSION['glpiactiveprofile']['user'] = READ;
+
+		$item = new PluginMoregroupsGroup();
+		$actions = $item->getSpecificMassiveActions();
+		foreach (array_keys($actions) as $key) {
+			$this->assertStringNotContainsString(
+				'activate',
+				$key,
+				'activate must not be advertised without Group_User update right'
+			);
+		}
+
+		$hook_actions = \plugin_moregroups_MassiveActions('Group_User');
+		$this->assertSame(
+			[],
+			$hook_actions,
+			'deactivate must not be advertised without Group_User update right'
+		);
 	}
 
 	// PluginMoregroupsGroup::uninstall() (a DROP TABLE) is not covered here:

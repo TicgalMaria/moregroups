@@ -37,18 +37,86 @@ use Glpi\Exception\Http\BadRequestHttpException;
 use GlpiPlugin\Moregroups\Controller\GroupActionController;
 use Group_User;
 use PluginMoregroupsGroup;
+use Session;
 use Symfony\Component\HttpFoundation\Request;
 
 class GroupActionControllerTest extends DbTestCase
 {
+	/**
+	 * Build a POST Request pre-loaded with a valid CSRF token, so tests
+	 * exercising other behavior aren't tripped up by the CSRF check.
+	 */
+	private function requestWithValidCsrf(array $request = [], array $server = []): Request
+	{
+		$request['_glpi_csrf_token'] = Session::getNewCSRFToken();
+
+		return new Request([], $request, [], [], [], $server);
+	}
+
 	public function testMissingParametersAreBadRequest(): void
 	{
 		$this->login();
 
 		$controller = new GroupActionController();
-		$request = new Request([], ['rowaction' => '', 'rowid' => '']);
+		$request = $this->requestWithValidCsrf(['rowaction' => '', 'rowid' => '']);
 
 		$this->expectException(BadRequestHttpException::class);
+		$controller($request);
+	}
+
+	public function testMissingCsrfTokenIsDenied(): void
+	{
+		$this->login();
+
+		$group = $this->createItem('Group', [
+			'name'        => 'moregroups-ctrl-test-' . uniqid(),
+			'entities_id' => getItemByTypeName('Entity', '_test_root_entity', true),
+		]);
+		$user_id = getItemByTypeName('User', TU_USER, true);
+
+		$tracked = $this->createItem('PluginMoregroupsGroup', [
+			'groups_id' => $group->getID(),
+			'users_id'  => $user_id,
+		]);
+
+		$controller = new GroupActionController();
+		// No `_glpi_csrf_token` at all - regression test for the missing
+		// CSRF validation found by the security audit.
+		$request = new Request([], ['rowaction' => 'activate', 'rowid' => (string) $tracked->getID()]);
+
+		$this->expectException(AccessDeniedHttpException::class);
+		$controller($request);
+
+		$leftover = new PluginMoregroupsGroup();
+		$this->assertTrue(
+			$leftover->getFromDB($tracked->getID()),
+			'A request without a valid CSRF token must not perform the activation'
+		);
+	}
+
+	public function testInvalidCsrfTokenIsDenied(): void
+	{
+		$this->login();
+
+		$group = $this->createItem('Group', [
+			'name'        => 'moregroups-ctrl-test-' . uniqid(),
+			'entities_id' => getItemByTypeName('Entity', '_test_root_entity', true),
+		]);
+		$user_id = getItemByTypeName('User', TU_USER, true);
+
+		$tracked = $this->createItem('PluginMoregroupsGroup', [
+			'groups_id' => $group->getID(),
+			'users_id'  => $user_id,
+		]);
+
+		$controller = new GroupActionController();
+		$request = new Request([], [
+			'rowaction'          => 'activate',
+			'rowid'              => (string) $tracked->getID(),
+			'_glpi_csrf_token'   => 'not-a-real-token',
+		]);
+
+		$this->expectException(AccessDeniedHttpException::class);
 		$controller($request);
 	}
 
@@ -73,7 +141,7 @@ class GroupActionControllerTest extends DbTestCase
 		$_SESSION['glpiactiveprofile']['group'] = 0;
 
 		$controller = new GroupActionController();
-		$request = new Request([], ['rowaction' => 'activate', 'rowid' => (string) $tracked->getID()]);
+		$request = $this->requestWithValidCsrf(['rowaction' => 'activate', 'rowid' => (string) $tracked->getID()]);
 
 		$this->expectException(AccessDeniedHttpException::class);
 		$controller($request);
@@ -95,12 +163,8 @@ class GroupActionControllerTest extends DbTestCase
 		]);
 
 		$controller = new GroupActionController();
-		$request = new Request(
-			[],
+		$request = $this->requestWithValidCsrf(
 			['rowaction' => 'activate', 'rowid' => (string) $tracked->getID()],
-			[],
-			[],
-			[],
 			['HTTP_REFERER' => '/front/group.form.php?id=' . $group->getID()]
 		);
 
@@ -116,5 +180,38 @@ class GroupActionControllerTest extends DbTestCase
 
 		$leftover = new PluginMoregroupsGroup();
 		$this->assertFalse($leftover->getFromDB($tracked->getID()));
+	}
+
+	public function testRedirectIgnoresForeignReferer(): void
+	{
+		global $CFG_GLPI;
+
+		$this->login();
+
+		$group = $this->createItem('Group', [
+			'name'        => 'moregroups-ctrl-test-' . uniqid(),
+			'entities_id' => getItemByTypeName('Entity', '_test_root_entity', true),
+		]);
+		$user_id = getItemByTypeName('User', TU_USER, true);
+
+		$tracked = $this->createItem('PluginMoregroupsGroup', [
+			'groups_id' => $group->getID(),
+			'users_id'  => $user_id,
+		]);
+
+		$controller = new GroupActionController();
+		$request = $this->requestWithValidCsrf(
+			['rowaction' => 'activate', 'rowid' => (string) $tracked->getID()],
+			['HTTP_REFERER' => 'https://evil.example/phish']
+		);
+
+		$response = $controller($request);
+
+		$this->assertSame(302, $response->getStatusCode());
+		$this->assertStringStartsWith(
+			$CFG_GLPI['url_base'],
+			$response->getTargetUrl(),
+			'A forged Referer header must never send the browser off-site'
+		);
 	}
 }

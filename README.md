@@ -6,7 +6,7 @@
 [![X](https://img.shields.io/twitter/follow/ticgalcom?style=flat-square&logo=x&label=Follow)](https://twitter.com/ticgalcom)
 [![Web](https://img.shields.io/badge/Web-TICGAL-blue.svg?style=flat-square)](https://tic.gal/)
 [![Localazy](https://img.shields.io/badge/Translate-Localazy-cyan)](https://localazy.com/p/more-groups)
-[![Manual](https://img.shields.io/badge/Manual-docs.tic.gal-blue.svg?style=flat-square)](https://docs.tic.gal/books/more-groups)
+[![Manual](https://img.shields.io/badge/Doc-Manuals-blue.svg?style=flat-square)](https://docs.tic.gal/books/more-groups)
 [![Marketplace](https://img.shields.io/badge/GLPI-Marketplace-orange.svg?style=flat-square)](https://plugins.glpi-project.org/#/plugins/moregroups)
 
 Fast group-membership management for GLPI: deactivate a group member without
