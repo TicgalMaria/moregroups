@@ -49,10 +49,6 @@ class GroupActionController extends AbstractController
 	{
 		global $CFG_GLPI;
 
-		if (!Session::validateCSRF($request->request->all())) {
-			throw new AccessDeniedHttpException();
-		}
-
 		$rowaction = $request->request->get('rowaction');
 		$rowid     = $request->request->get('rowid');
 
